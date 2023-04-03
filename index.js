@@ -4,7 +4,6 @@ const figures = require("figures");
 const Base = require("inquirer/lib/prompts/base");
 const Choices = require("inquirer/lib/objects/choices");
 const observe = require("inquirer/lib/utils/events");
-const Paginator = require("inquirer/lib/utils/paginator");
 const Table = require("cli-table");
 const { map, takeUntil } = require("rxjs/operators");
 
@@ -18,11 +17,17 @@ class TablePrompt extends Base {
    */
   constructor(questions, rl, answers) {
     super(questions, rl, answers);
+    this.selectAll = this.opt.selectAll || false
+
+    const formattedRows = this.selectAll ? [ {
+      name: "Select All",
+      value: "selectAll"
+    },...(this.opt.rows || [])] : []
 
     this.columns = new Choices(this.opt.columns, []);
     this.pointer = 0;
     this.horizontalPointer = 0;
-    this.rows = new Choices(this.opt.rows, []);
+    this.rows = new Choices(formattedRows, []);
     this.values = this.columns.filter(() => true).map(() => undefined);
 
     this.pageSize = this.opt.pageSize || 5;
@@ -99,7 +104,12 @@ class TablePrompt extends Base {
 
     this.screen.done();
     cliCursor.show();
-    this.done(state.value);
+    if(this.selectAll){ // remove select all row
+      const [,...truncatedValue] = state.value
+      this.done(truncatedValue);
+    }else {
+      this.done(state.value);
+    }
   }
 
   onError(state) {
@@ -122,10 +132,22 @@ class TablePrompt extends Base {
     this.render();
   }
 
+  selectAllValues(value){
+    let values = [];
+    for(let i=0;i<this.rows.length; i++){
+      values.push(value)
+    }
+    this.values = values
+  }
+
   onSpaceKey() {
     const value = this.columns.get(this.horizontalPointer).value;
-
-    this.values[this.pointer] = value;
+    const rowValue = this.rows.get(this.pointer)?.value || '';
+    if(rowValue === 'selectAll'){
+      this.selectAllValues(value)
+    }else{
+      this.values[this.pointer] = value;
+    }
     this.spaceKeyPressed = true;
     this.render();
   }
