@@ -17,7 +17,7 @@ After registering the prompt, set any question to have `type: "table"` to make u
 The result will be an array, containing the value for each row.
 
 ```js
-inquirer.registerPrompt("table", require("./index"));
+inquirer.registerPrompt("table", require("inquirer-table-prompt"));
 
 inquirer
   .prompt([
@@ -25,6 +25,7 @@ inquirer
       type: "table",
       name: "workoutPlan",
       message: "Choose your workout plan for next week",
+      selectAll: true,
       columns: [
         {
           name: "Arms",
