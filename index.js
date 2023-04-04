@@ -188,7 +188,7 @@ class TablePrompt extends Base {
     const table = new Table({
       head: [
         chalk.reset.dim(
-          `${firstIndex + 1}-${lastIndex + 1} of ${this.rows.realLength}`
+          `${firstIndex + 1}-${lastIndex} of ${this.rows.realLength - 1}`
         )
       ].concat(this.columns.pluck("name").map(name => chalk.reset.bold(name)))
     });
